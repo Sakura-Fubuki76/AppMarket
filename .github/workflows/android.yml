@@ -27,7 +27,7 @@ jobs:
       build: ${{ steps.release.outputs.build }}
       notify: ${{ steps.release.outputs.notify }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
           token: ${{ secrets.SYNC_TOKEN || github.token }}
@@ -67,7 +67,7 @@ jobs:
           git push origin "HEAD:refs/heads/$TARGET_BRANCH"
       - name: Check release
         id: release
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9.0.0
         with:
           script: |
             const {execFileSync} = require('node:child_process');
@@ -96,20 +96,21 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ needs.prepare.outputs.sha }}
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6.0.1
         with:
           distribution: zulu
           java-version: '21'
-      - uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v4.0.4
         with:
           packages: platform-tools
+          cmdline-tools-version: '15859902'
           log-accepted-android-sdk-licenses: false
-      - uses: gradle/actions/setup-gradle@v6
+      - uses: gradle/actions/setup-gradle@v6.4.0
       - name: Decode and validate signing key
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
@@ -145,7 +146,7 @@ jobs:
             cp "$apk" release-assets/
           done
           (cd release-assets && sha256sum *.apk > SHA256SUMS.txt)
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7.0.1
         with:
           name: signed-release-apk
           path: release-assets/*
@@ -177,7 +178,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ needs.prepare.outputs.sha }}
           persist-credentials: false
@@ -195,7 +196,7 @@ jobs:
           REPO: ${{ github.repository }}
         run: python3 scripts/notify_telegram.py
       - name: Record successful notification
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9.0.0
         env:
           RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
         with:
